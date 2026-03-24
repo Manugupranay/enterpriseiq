@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EnterpriseIQ — AI Finance & Sales Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #080c14;
+  --surface: #0d1420;
+  --surface2: #121a2a;
+  --border: #1e2d45;
+  --blue: #3b82f6;
+  --blue2: #2563eb;
+  --cyan: #06b6d4;
+  --green: #10b981;
+  --red: #ef4444;
+  --gold: #f59e0b;
+  --purple: #8b5cf6;
+  --text: #cbd5e1;
+  --muted: #64748b;
+  --white: #f1f5f9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.logo{padding:20px 16px;border-bottom:1px solid var(--border);}
+.logo-mark{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;}
+.logo-mark span{color:var(--blue);}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+.nav{padding:12px 8px;flex:1;}
+.nav-section-label{font-size:9px;color:var(--muted);letter-spacing:2px;padding:8px 8px 4px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--muted);transition:all 0.15s;margin-bottom:2px;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(59,130,246,0.12);color:var(--blue);}
+.nav-badge{margin-left:auto;font-size:9px;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;}
+.badge-blue{background:rgba(59,130,246,0.2);color:var(--blue);}
+.badge-green{background:rgba(16,185,129,0.2);color:var(--green);}
+.badge-purple{background:rgba(139,92,246,0.2);color:var(--purple);}
+.badge-gold{background:rgba(245,158,11,0.2);color:var(--gold);}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);}
+.status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;}
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--white);}
+.page-title span{color:var(--blue);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.tech-tag{font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid;font-family:'JetBrains Mono',monospace;}
+.tag-blue{border-color:var(--blue);color:var(--blue);}
+.tag-cyan{border-color:var(--cyan);color:var(--cyan);}
+.tag-purple{border-color:var(--purple);color:var(--purple);}
+.tag-green{border-color:var(--green);color:var(--green);}
+
+/* PAGES */
+.page{display:none;flex:1;overflow-y:auto;padding:24px;}
+.page.active{display:block;}
+
+/* DASHBOARD */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.kpi-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--white);}
+.kpi-change{font-size:11px;margin-top:4px;}
+.up{color:var(--green);}
+.down{color:var(--red);}
+.neutral{color:var(--muted);}
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.chart-card h3{font-size:13px;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;}
+.insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.insight-card h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.risk-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);}
+.risk-item:last-child{border-bottom:none;}
+.risk-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.dot-red{background:var(--red);}
+.dot-gold{background:var(--gold);}
+.dot-green{background:var(--green);}
+
+/* CHAT PAGE */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 57px);}
+.chat-messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.msg{display:flex;gap:10px;max-width:85%;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.avatar.ai{background:linear-gradient(135deg,var(--blue),var(--cyan));}
+.avatar.user{background:var(--surface2);border:1px solid var(--border);}
+.bubble{padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.6;}
+.msg.ai .bubble{background:var(--surface2);border:1px solid var(--border);}
+.msg.user .bubble{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:var(--white);}
+.bubble strong{color:var(--white);}
+.source-chip{display:inline-block;font-size:10px;padding:2px 7px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:4px;color:var(--blue);font-family:'JetBrains Mono',monospace;margin:3px 2px 0 0;}
+.typing-dots{display:flex;gap:4px;padding:10px 14px;}
+.typing-dots span{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:bounce 1.2s infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}
+.typing-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+.chat-input-area{padding:14px 24px;border-top:1px solid var(--border);background:var(--surface);}
+.quick-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.qbtn{font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+.qbtn:hover{border-color:var(--blue);color:var(--blue);}
+.input-row{display:flex;gap:8px;}
+.chat-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border .15s;}
+.chat-input:focus{border-color:var(--blue);}
+.send-btn{width:40px;height:40px;background:var(--blue);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.send-btn:hover{background:var(--blue2);}
+.send-btn svg{width:16px;height:16px;fill:white;}
+
+/* FORECAST PAGE */
+.forecast-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
+.forecast-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.forecast-card h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.forecast-table{width:100%;border-collapse:collapse;font-size:12px;}
+.forecast-table th{text-align:left;padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:500;}
+.forecast-table td{padding:7px 10px;border-bottom:1px solid rgba(30,45,69,0.5);}
+.forecast-table tr:last-child td{border-bottom:none;}
+.btn{padding:9px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;transition:all .15s;}
+.btn-primary{background:var(--blue);color:white;}
+.btn-primary:hover{background:var(--blue2);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+.explanation-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12.5px;line-height:1.65;color:var(--text);margin-top:14px;display:none;}
+
+/* ACTIONS PAGE */
+.actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.action-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;}
+.action-card h3{font-size:13px;color:var(--white);margin-bottom:16px;font-weight:600;}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--white);font-size:13px;font-family:'Inter',sans-serif;outline:none;}
+.form-input:focus{border-color:var(--blue);}
+.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--white);font-size:12px;font-family:'Inter',sans-serif;outline:none;resize:vertical;min-height:70px;}
+.action-result{background:var(--surface2);border:1px solid rgba(16,185,129,0.3);border-radius:7px;padding:12px;margin-top:12px;font-size:12.5px;color:var(--green);display:none;line-height:1.6;}
+.action-result.error{border-color:rgba(239,68,68,0.3);color:var(--red);}
+
+/* ANALYSIS PAGE */
+.analysis-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.analysis-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.analysis-output{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.analysis-input h3,.analysis-output h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.analysis-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px;color:var(--white);font-size:12px;font-family:'Inter',sans-serif;outline:none;resize:none;height:220px;}
+.analysis-result{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:14px;font-size:12.5px;line-height:1.7;color:var(--text);min-height:220px;white-space:pre-wrap;}
+.type-btns{display:flex;gap:6px;margin-bottom:12px;}
+.type-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11.5px;font-family:'Inter',sans-serif;transition:all .15s;}
+.type-btn.active{background:rgba(59,130,246,0.1);border-color:var(--blue);color:var(--blue);}
+
+/* LOADING */
+.loading::after{content:'';animation:dots 1.5s infinite;}
+@keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">Enterprise<span>IQ</span></div>
+    <div class="logo-sub">AI FINANCE · SALES</div>
+  </div>
+  <div class="nav">
+    <div class="nav-section-label">Intelligence</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</div>
+    <div class="nav-item" onclick="showPage('chat',this)">💬 AI Analyst <span class="nav-badge badge-blue">RAG+LLM</span></div>
+    <div class="nav-item" onclick="showPage('forecast',this)">📈 Forecasting <span class="nav-badge badge-green">ML</span></div>
+    <div class="nav-item" onclick="showPage('analysis',this)">🔍 Doc Analysis <span class="nav-badge badge-cyan" style="background:rgba(6,182,212,0.2);color:var(--cyan)">AI</span></div>
+    <div class="nav-section-label" style="margin-top:8px">Automation</div>
+    <div class="nav-item" onclick="showPage('actions',this)">⚡ Actions <span class="nav-badge badge-purple">MCP</span></div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="status"><span class="dot"></span>All systems online</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace">Claude · RAG · scikit-learn</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Finance <span>Dashboard</span></div>
+    <div class="topbar-right">
+      <span class="tech-tag tag-blue">RAG</span>
+      <span class="tech-tag tag-blue">LLM</span>
+      <span class="tech-tag tag-green">ML</span>
+      <span class="tech-tag tag-purple">MCP</span>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card"><div class="kpi-label">YTD Revenue</div><div class="kpi-value" id="kpi-ytd">—</div><div class="kpi-change neutral">Loading...</div></div>
+      <div class="kpi-card"><div class="kpi-label">Monthly Avg</div><div class="kpi-value" id="kpi-avg">—</div><div class="kpi-change neutral">Loading...</div></div>
+      <div class="kpi-card"><div class="kpi-label">QoQ Growth</div><div class="kpi-value" id="kpi-growth">—</div><div class="kpi-change neutral">Loading...</div></div>
+      <div class="kpi-card"><div class="kpi-label">Best Month</div><div class="kpi-value" id="kpi-best">—</div><div class="kpi-change neutral">Loading...</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Revenue Trend — Last 18 Months</h3>
+        <canvas id="revenueChart" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Product Mix</h3>
+        <canvas id="productChart" height="180"></canvas>
+      </div>
+    </div>
+    <div class="insights-grid">
+      <div class="insight-card">
+        <h3>⚠️ Risk Register</h3>
+        <div class="risk-item"><span class="risk-dot dot-red"></span>Customer concentration — top 3 = 18% revenue, renewal Q1</div>
+        <div class="risk-item"><span class="risk-dot dot-red"></span>EMEA underperforming — down 3% YoY, competitive pressure</div>
+        <div class="risk-item"><span class="risk-dot dot-gold"></span>2 open AE headcount — Q4 targets at risk</div>
+        <div class="risk-item"><span class="risk-dot dot-gold"></span>Enterprise SSO feature gap — $2.1M at risk</div>
+        <div class="risk-item"><span class="risk-dot dot-green"></span>Pipeline coverage 3.2x — healthy</div>
+      </div>
+      <div class="insight-card">
+        <h3>🚀 Quick Actions</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+          <button class="btn btn-primary" style="width:100%" onclick="showPage('chat',document.querySelectorAll('.nav-item')[1])">💬 Ask AI Analyst</button>
+          <button class="btn btn-outline" style="width:100%" onclick="showPage('forecast',document.querySelectorAll('.nav-item')[2])">📈 View Revenue Forecast</button>
+          <button class="btn btn-outline" style="width:100%" onclick="generateFullReport()">📄 Generate Executive Report</button>
+          <button class="btn btn-outline" style="width:100%" onclick="showPage('actions',document.querySelectorAll('.nav-item')[4])">⚡ Send Report via Email</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT PAGE -->
+  <div class="page" id="page-chat">
+    <div class="chat-wrap">
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg ai">
+          <div class="avatar ai">🤖</div>
+          <div class="bubble"><strong>EnterpriseIQ AI Analyst</strong><br><br>
+          I have access to your company's sales data, financial reports, pipeline metrics, and market intelligence.<br><br>
+          Ask me anything about your business performance. Try: <em>"Which region underperformed Q3?"</em> or <em>"What's our win rate?"</em></div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="quick-btns">
+          <button class="qbtn" onclick="sendQuick('Which region underperformed in Q3 and why?')">Region performance</button>
+          <button class="qbtn" onclick="sendQuick('What is our current win rate and pipeline coverage?')">Pipeline status</button>
+          <button class="qbtn" onclick="sendQuick('What are the biggest risks to Q4 revenue?')">Q4 risks</button>
+          <button class="qbtn" onclick="sendQuick('How is our customer retention and NRR?')">Customer health</button>
+          <button class="qbtn" onclick="sendQuick('What products are growing fastest?')">Product growth</button>
+          <button class="qbtn" onclick="sendQuick('Summarize our financial performance this year')">Financial summary</button>
+        </div>
+        <div class="input-row">
+          <input class="chat-input" id="chatInput" placeholder="Ask about sales, revenue, pipeline, customers..." onkeydown="if(event.key==='Enter')sendChat()"/>
+          <button class="send-btn" onclick="sendChat()">
+            <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORECAST PAGE -->
+  <div class="page" id="page-forecast">
+    <div class="forecast-grid">
+      <div class="forecast-card">
+        <h3>Revenue Forecast — Next 6 Months</h3>
+        <canvas id="forecastChart" height="200"></canvas>
+        <div class="explanation-box" id="forecastExplanation"></div>
+      </div>
+      <div class="forecast-card">
+        <h3>Forecast Table</h3>
+        <table class="forecast-table" id="forecastTable">
+          <thead><tr><th>Month</th><th>Forecast</th><th>Range</th></tr></thead>
+          <tbody><tr><td colspan="3" style="color:var(--muted);text-align:center;padding:20px">Click Load Forecast</td></tr></tbody>
+        </table>
+        <div style="margin-top:14px;display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="loadForecast()">📈 Load Forecast + AI Explanation</button>
+        </div>
+        <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:11.5px;color:var(--muted);">
+          <div style="color:var(--text);font-weight:500;margin-bottom:6px;">Anomalies Detected</div>
+          <div id="anomalyList">Click Load Forecast to detect anomalies</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS PAGE -->
+  <div class="page" id="page-analysis">
+    <div class="analysis-wrap">
+      <div class="analysis-input">
+        <h3>Document Intelligence</h3>
+        <div class="type-btns">
+          <button class="type-btn active" id="btn-summary" onclick="setType('summary')">Summary</button>
+          <button class="type-btn" id="btn-kpis" onclick="setType('kpis')">Extract KPIs</button>
+          <button class="type-btn" id="btn-anomalies" onclick="setType('anomalies')">Find Anomalies</button>
+        </div>
+        <textarea class="analysis-textarea" id="docContent" placeholder="Paste any business document here — sales report, financial statement, email, contract, meeting notes...
+
+Example: 'Q3 Sales Report: North America achieved $4.2M in revenue, representing 12% growth year-over-year. The Enterprise segment was the strongest performer at $3.1M. However, EMEA declined 3% to $2.8M due to competitive pressure from...'"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="analyzeDoc()">🔍 Analyze Document</button>
+          <button class="btn btn-outline" onclick="loadSampleDoc()">Load Sample</button>
+        </div>
+      </div>
+      <div class="analysis-output">
+        <h3>AI Analysis Output</h3>
+        <div class="analysis-result" id="analysisResult" style="color:var(--muted)">Analysis will appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS PAGE -->
+  <div class="page" id="page-actions">
+    <div class="actions-grid">
+      <div class="action-card">
+        <h3>📧 Send Intelligence Report</h3>
+        <div class="form-group"><label class="form-label">Recipient Email</label><input class="form-input" id="a_email" placeholder="ceo@company.com"/></div>
+        <div class="form-group"><label class="form-label">Subject</label><input class="form-input" id="a_subject" value="EnterpriseIQ — Q3 Business Intelligence Report"/></div>
+        <div class="form-group"><label class="form-label">Report Content</label><textarea class="form-textarea" id="a_content" placeholder="Paste report content or generate one first...">Q3 Performance Summary: Revenue $8.9M (108% of target). Top region: North America +12% YoY. APAC fastest growing at +28%. Key risk: EMEA -3% YoY. Q4 forecast: $9.6M base case. Recommended actions: (1) Address EMEA competitive situation, (2) Accelerate 3 enterprise deals in closing stage, (3) Hire 2 AEs for Q4 capacity.</textarea></div>
+        <button class="btn btn-primary" onclick="sendEmail()">📤 Send via Gmail (MCP)</button>
+        <div class="action-result" id="emailResult"></div>
+      </div>
+      <div class="action-card">
+        <h3>📅 Schedule Business Review</h3>
+        <div class="form-group"><label class="form-label">Meeting Title</label><input class="form-input" id="m_title" value="Q3 Business Review — EnterpriseIQ Analysis"/></div>
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="m_date" type="date"/></div>
+        <div class="form-group"><label class="form-label">Time</label><input class="form-input" id="m_time" type="time" value="10:00"/></div>
+        <div class="form-group"><label class="form-label">Attendees</label><input class="form-input" id="m_attendees" placeholder="CEO, CFO, VP Sales"/></div>
+        <button class="btn btn-primary" onclick="scheduleMeeting()">📅 Schedule via Google Calendar (MCP)</button>
+        <div class="action-result" id="meetingResult"></div>
+      </div>
+    </div>
+    <div style="margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
+      <h3 style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">⚡ Generate Full Executive Report</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">AI generates a complete executive report from all your business data, then you can email it directly.</p>
+      <button class="btn btn-primary" onclick="generateAndEmail()">🚀 Generate Report + Send Email</button>
+      <div class="action-result" id="fullReportResult" style="margin-top:12px;color:var(--text);"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000/api';
+let analysisType = 'summary';
+let revenueChart, productChart, forecastChart;
+
+// PAGE NAVIGATION
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if(el) el.classList.add('active');
+  const titles = {
+    dashboard:'Finance <span style="color:var(--blue)">Dashboard</span>',
+    chat:'AI <span style="color:var(--blue)">Analyst</span>',
+    forecast:'Revenue <span style="color:var(--blue)">Forecasting</span>',
+    analysis:'Document <span style="color:var(--blue)">Intelligence</span>',
+    actions:'Automated <span style="color:var(--blue)">Actions</span>'
+  };
+  document.getElementById('pageTitle').innerHTML = titles[name] || name;
+  if(name === 'forecast' && !forecastChart) loadForecast();
+}
+
+// DASHBOARD KPIs
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${API}/analysis/kpis`);
+    if(!res.ok) throw new Error('Backend not running');
+    const d = await res.json();
+    document.getElementById('kpi-ytd').textContent = '$' + d.total_revenue_ytd + 'M';
+    document.getElementById('kpi-avg').textContent = '$' + d.avg_monthly_revenue + 'M';
+    const growth = d.revenue_growth_qoq;
+    document.getElementById('kpi-growth').textContent = (growth > 0 ? '+' : '') + growth + '%';
+    document.getElementById('kpi-growth').nextElementSibling.className = 'kpi-change ' + (growth > 0 ? 'up' : 'down');
+    document.getElementById('kpi-growth').nextElementSibling.textContent = growth > 0 ? '↑ vs previous quarter' : '↓ vs previous quarter';
+    document.getElementById('kpi-best').textContent = '$' + d.best_month_revenue + 'M';
+    document.getElementById('kpi-best').nextElementSibling.textContent = d.best_month;
+    drawRevenueChart();
+    drawProductChart();
+  } catch(e) {
+    document.getElementById('kpi-ytd').textContent = '$112.4M';
+    document.getElementById('kpi-avg').textContent = '$9.4M';
+    document.getElementById('kpi-growth').textContent = '+8.2%';
+    document.getElementById('kpi-best').textContent = '$10.8M';
+    drawRevenueChart();
+    drawProductChart();
+  }
+}
+
+function drawRevenueChart() {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  if(revenueChart) revenueChart.destroy();
+  const labels = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  const data = [6.8,7.1,8.2,6.9,7.3,8.6,7.8,8.1,9.2,8.4,8.7,9.6,9.1,9.4,10.8,8.9,9.2,10.1];
+  revenueChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:'Revenue ($M)',
+        data,
+        borderColor:'#3b82f6',
+        backgroundColor:'rgba(59,130,246,0.08)',
+        fill:true,
+        tension:0.4,
+        pointRadius:3,
+        pointBackgroundColor:'#3b82f6',
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10}}},
+        y:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10},callback:v=>'$'+v+'M'}}
+      }
+    }
+  });
+}
+
+function drawProductChart() {
+  const ctx = document.getElementById('productChart').getContext('2d');
+  if(productChart) productChart.destroy();
+  productChart = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels:['Enterprise Suite','Professional','Growth','Starter','Legacy'],
+      datasets:[{
+        data:[35,27,20,13,5],
+        backgroundColor:['#3b82f6','#06b6d4','#10b981','#8b5cf6','#64748b'],
+        borderWidth:0,
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#64748b',font:{size:10},padding:8}}
+      }
+    }
+  });
+}
+
+// CHAT
+function addMsg(role, html) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = `<div class="avatar ${role}">${role==='ai'?'🤖':'👤'}</div><div class="bubble">${html}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = 'typing';
+  div.innerHTML = `<div class="avatar ai">🤖</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if(!q) return;
+  input.value = '';
+  sendQuick(q);
+}
+
+async function sendQuick(query) {
+  addMsg('user', query);
+  showTyping();
+  try {
+    const res = await fetch(`${API}/chat/ask`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query, history:[]})
+    });
+    document.getElementById('typing')?.remove();
+    if(!res.ok) throw new Error('Server error ' + res.status);
+    const data = await res.json();
+    let html = (data.answer || '').replace(/\n/g,'<br>');
+    if(data.sources?.length) {
+      html += '<br><br>';
+      [...new Set(data.sources)].forEach(s => { html += `<span class="source-chip">📊 ${s}</span>`; });
+    }
+    addMsg('ai', html);
+  } catch(e) {
+    document.getElementById('typing')?.remove();
+    addMsg('ai', `<span style="color:var(--red)">⚠️ ${e.message}</span><br><small style="color:var(--muted)">Make sure backend is running at http://127.0.0.1:8000</small>`);
+  }
+}
+
+// FORECAST
+async function loadForecast() {
+  try {
+    const res = await fetch(`${API}/forecast/revenue`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({periods:6})});
+    if(!res.ok) throw new Error('Server error');
+    const data = await res.json();
+    drawForecastChart(data);
+    populateForecastTable(data);
+    if(data.explanation) {
+      const box = document.getElementById('forecastExplanation');
+      box.style.display = 'block';
+      box.textContent = data.explanation;
+    }
+    loadAnomalies();
+  } catch(e) {
+    drawForecastChartDemo();
+  }
+}
+
+function drawForecastChart(data) {
+  const ctx = document.getElementById('forecastChart').getContext('2d');
+  if(forecastChart) forecastChart.destroy();
+  const hist = data.historical || [];
+  const fore = data.forecasts || [];
+  const labels = [...hist.map(h=>h.month.split(' ')[0]), ...fore.map(f=>f.month.split(' ')[0])];
+  const histData = hist.map(h=>h.revenue);
+  const foreData = Array(hist.length).fill(null).concat(fore.map(f=>f.forecast));
+  const upperData = Array(hist.length).fill(null).concat(fore.map(f=>f.upper));
+  const lowerData = Array(hist.length).fill(null).concat(fore.map(f=>f.lower));
+  forecastChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:'Actual',data:histData,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.4,pointRadius:3},
+        {label:'Forecast',data:foreData,borderColor:'#10b981',borderDash:[5,5],backgroundColor:'rgba(16,185,129,0.08)',fill:true,tension:0.4,pointRadius:3},
+        {label:'Upper',data:upperData,borderColor:'rgba(16,185,129,0.3)',fill:false,pointRadius:0,borderWidth:1},
+        {label:'Lower',data:lowerData,borderColor:'rgba(16,185,129,0.3)',fill:false,pointRadius:0,borderWidth:1},
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#64748b',font:{size:10}}}},
+      scales:{
+        x:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10}}},
+        y:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10},callback:v=>'$'+v+'M'}}
+      }
+    }
+  });
+}
+
+function drawForecastChartDemo() {
+  const ctx = document.getElementById('forecastChart').getContext('2d');
+  if(forecastChart) forecastChart.destroy();
+  const labels = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+  forecastChart = new Chart(ctx, {
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Actual',data:[8.4,8.7,9.6,9.1,9.4,10.8,null,null,null,null,null,null],borderColor:'#3b82f6',tension:0.4,pointRadius:3},
+      {label:'Forecast',data:[null,null,null,null,null,10.8,10.2,10.6,11.1,10.4,10.8,11.4],borderColor:'#10b981',borderDash:[5,5],tension:0.4,pointRadius:3},
+    ]},
+    options:{responsive:true,plugins:{legend:{labels:{color:'#64748b',font:{size:10}}}},scales:{x:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10}}},y:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10},callback:v=>'$'+v+'M'}}}}
+  });
+  populateForecastTableDemo();
+}
+
+function populateForecastTable(data) {
+  const tbody = document.querySelector('#forecastTable tbody');
+  tbody.innerHTML = '';
+  (data.forecasts || []).forEach(f => {
+    tbody.innerHTML += `<tr><td style="color:var(--text)">${f.month}</td><td style="color:var(--green);font-weight:500">$${f.forecast}M</td><td style="color:var(--muted);font-size:11px">$${f.lower}M – $${f.upper}M</td></tr>`;
+  });
+}
+
+function populateForecastTableDemo() {
+  const tbody = document.querySelector('#forecastTable tbody');
+  const rows = [
+    ['Apr 2025','10.2','9.38–11.02'],['May 2025','10.6','9.75–11.45'],
+    ['Jun 2025','11.1','10.2–11.99'],['Jul 2025','10.4','9.57–11.23'],
+    ['Aug 2025','10.8','9.94–11.66'],['Sep 2025','11.4','10.49–12.31'],
+  ];
+  tbody.innerHTML = rows.map(r=>`<tr><td style="color:var(--text)">${r[0]}</td><td style="color:var(--green);font-weight:500">$${r[1]}M</td><td style="color:var(--muted);font-size:11px">$${r[2]}M</td></tr>`).join('');
+}
+
+async function loadAnomalies() {
+  try {
+    const res = await fetch(`${API}/analysis/anomalies`);
+    if(!res.ok) throw new Error();
+    const data = await res.json();
+    const list = document.getElementById('anomalyList');
+    if(data.anomalies?.length) {
+      list.innerHTML = data.anomalies.map(a =>
+        `<div style="font-size:11.5px;padding:4px 0;color:${a.type==='spike'?'var(--green)':'var(--red)'}">${a.type==='spike'?'↑':'↓'} ${a.month}: $${a.revenue}M (${a.deviation})</div>`
+      ).join('');
+    } else {
+      list.innerHTML = '<span style="color:var(--green)">No significant anomalies detected</span>';
+    }
+  } catch(e) {
+    document.getElementById('anomalyList').innerHTML = '<span style="color:var(--muted)">Connect backend to detect anomalies</span>';
+  }
+}
+
+// ANALYSIS
+function setType(type) {
+  analysisType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + type).classList.add('active');
+}
+
+async function analyzeDoc() {
+  const content = document.getElementById('docContent').value.trim();
+  if(!content) return;
+  const result = document.getElementById('analysisResult');
+  result.style.color = 'var(--muted)';
+  result.textContent = 'Analyzing document...';
+  try {
+    const res = await fetch(`${API}/analysis/document`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({content, analysis_type: analysisType})
+    });
+    if(!res.ok) throw new Error('Server error ' + res.status);
+    const data = await res.json();
+    result.style.color = 'var(--text)';
+    result.textContent = data.analysis;
+  } catch(e) {
+    result.style.color = 'var(--red)';
+    result.textContent = 'Error: ' + e.message + '\n\nMake sure backend is running at http://127.0.0.1:8000';
+  }
+}
+
+function loadSampleDoc() {
+  document.getElementById('docContent').value = `Q3 2024 Sales Performance Report
+
+Executive Summary:
+Total Q3 revenue: $8.9M vs $8.2M target (108% attainment). Year-over-year growth: +8.5%.
+
+Regional Breakdown:
+- North America: $4.2M (+12% YoY) — Strong enterprise deals
+- EMEA: $2.8M (-3% YoY) — Competitive pressure from CompetitorA
+- APAC: $1.9M (+28% YoY) — Expansion into Australia and Singapore
+
+Product Performance:
+Enterprise Suite: $3.1M (35% of revenue, +34% YoY)
+Professional: $2.4M (27%, +18% YoY)
+Legacy Basic: $0.4M (5%, -22% YoY) — migration needed
+
+Sales Team: 18 AEs, 67% above quota. 2 AEs departed Q3.
+Pipeline: $24.3M total, 3.2x coverage ratio.
+New logos: 23 accounts added.
+
+Key Risks:
+1. EMEA declining — aggressive competitor pricing
+2. Legacy tier churn accelerating
+3. 2 open headcount impacting Q4 capacity`;
+}
+
+// ACTIONS
+async function sendEmail() {
+  const result = document.getElementById('emailResult');
+  result.style.display = 'block';
+  result.className = 'action-result';
+  result.textContent = 'Sending email via Gmail MCP...';
+  try {
+    const res = await fetch(`${API}/actions/send-report`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        recipient: document.getElementById('a_email').value,
+        subject: document.getElementById('a_subject').value,
+        content: document.getElementById('a_content').value,
+      })
+    });
+    const data = await res.json();
+    result.className = 'action-result ' + (data.success ? '' : 'error');
+    result.textContent = (data.success ? '✅ ' : '⚠️ ') + data.message;
+  } catch(e) {
+    result.className = 'action-result error';
+    result.textContent = '⚠️ ' + e.message;
+  }
+}
+
+async function scheduleMeeting() {
+  const result = document.getElementById('meetingResult');
+  result.style.display = 'block';
+  result.className = 'action-result';
+  result.textContent = 'Scheduling via Google Calendar MCP...';
+  try {
+    const res = await fetch(`${API}/actions/schedule-meeting`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        title: document.getElementById('m_title').value,
+        date: document.getElementById('m_date').value,
+        time: document.getElementById('m_time').value,
+        attendees: document.getElementById('m_attendees').value,
+      })
+    });
+    const data = await res.json();
+    result.className = 'action-result ' + (data.success ? '' : 'error');
+    result.textContent = (data.success ? '✅ ' : '⚠️ ') + data.message;
+  } catch(e) {
+    result.className = 'action-result error';
+    result.textContent = '⚠️ ' + e.message;
+  }
+}
+
+async function generateFullReport() {
+  showPage('actions', document.querySelectorAll('.nav-item')[4]);
+  const result = document.getElementById('fullReportResult');
+  result.style.display = 'block';
+  result.textContent = 'Generating executive report with AI...';
+  try {
+    const res = await fetch(`${API}/analysis/report`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({})});
+    if(!res.ok) throw new Error('Server error');
+    const data = await res.json();
+    result.textContent = data.report;
+    document.getElementById('a_content').value = data.report;
+  } catch(e) {
+    result.textContent = 'Error: ' + e.message;
+  }
+}
+
+async function generateAndEmail() {
+  await generateFullReport();
+}
+
+// INIT
+loadDashboard();
+document.getElementById('m_date').valueAsDate = new Date(Date.now() + 7*24*60*60*1000);
+</script>
+</body>
+</html>
