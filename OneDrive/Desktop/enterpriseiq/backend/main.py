@@ -51,3 +51,8 @@ app.include_router(actions.router, prefix="/api/actions", tags=["Actions"])
 @app.get("/")
 def root():
     return {"status": "EnterpriseIQ AI is running", "version": "1.0.0"}
+
+import os
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run('main:app', host='0.0.0.0', port=int(os.environ.get('PORT', 8000)))
