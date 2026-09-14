@@ -26,7 +26,7 @@ MCP-style tool calls.
 
 ## Repository layout
 
-`@
+```
 OneDrive/Desktop/enterpriseiq/
 ├── backend/
 │   ├── main.py              # FastAPI app, CORS, router registration
